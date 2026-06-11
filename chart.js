@@ -34,59 +34,56 @@ let options = {
 let chart = new ApexCharts(document.querySelector("#users-chart"), options);
 chart.render();
 
-// ========== DEVICE TRAFFIC BAR CHART ==========
+
+
+// ========== DEVICE TRAFFIC BAR CHART - EXACT FIGMA ==========
+const deviceData = [
+    { label: 'Linux', height: 61, color: '#0000000A' },
+    { label: 'Mac', height: 114, color: '#0000000A' },
+    { label: 'iOS', height: 81, color: '#0000000A' },
+    { label: 'Windows', height: 130, color: '#0000000A' },
+    { label: 'Android', height: 97, color: '#007AFF' },
+    { label: 'Other', height: 48, color: '#0000000A' }
+];
+
+const maxDeviceHeight = 130;
+
 let deviceOptions = {
     series: [{
         name: 'Traffic',
-        data: [15, 25, 20, 35, 45, 10]
+        data: deviceData.map(d => (d.height / maxDeviceHeight) * 100)
     }],
     chart: {
         type: 'bar',
-        height: 240,
+        height: 200,
         toolbar: { show: false },
         parentHeightOffset: 0,
-        animations: {
-            enabled: false
-        },
+        animations: { enabled: false },
         events: {
-            mounted: function(chartContext, config) {
-                setTimeout(() => {
-                    addAndroidBadge();
-                }, 100);
+            mounted: function() {
+                setTimeout(addAndroidBadge, 100);
             },
-            updated: function(chartContext, config) {
-                setTimeout(() => {
-                    addAndroidBadge();
-                }, 100);
+            updated: function() {
+                setTimeout(addAndroidBadge, 100);
             }
         }
     },
     plotOptions: {
         bar: {
-            columnWidth: '72%',
-            borderRadius: 8,
+            columnWidth: '55%',
+            borderRadius: 20,
             borderRadiusApplication: 'end',
             distributed: true,
             states: {
-                hover: {
-                    filter: {
-                        type: 'none'
-                    }
-                },
-                active: {
-                    filter: {
-                        type: 'none'
-                    }
-                }
+                hover: { filter: { type: 'none' } },
+                active: { filter: { type: 'none' } }
             }
         }
     },
-    colors: ['#E5E7EB', '#E5E7EB', '#E5E7EB', '#E5E7EB', '#007AFF', '#E5E7EB'],
-    dataLabels: {
-        enabled: false
-    },
+    colors: deviceData.map(d => d.color),
+    dataLabels: { enabled: false },
     xaxis: {
-        categories: ['Linux', 'Mac', 'iOS', 'Windows', 'Android', 'Other'],
+        categories: deviceData.map(d => d.label),
         axisBorder: { show: false },
         axisTicks: { show: false },
         labels: {
@@ -97,50 +94,24 @@ let deviceOptions = {
             }
         }
     },
-    yaxis: {
-        show: false,
-        max: 55
-    },
-    grid: {
-        show: false,
-        padding: {
-            top: 40,
-            right: 0,
-            bottom: 0,
-            left: 0
-        }
-    },
-    legend: {
-        show: false
-    },
+    yaxis: { show: false },
+    grid: { show: false },
+    legend: { show: false },
     tooltip: {
         enabled: true,
-        y: {
-            formatter: function(val) {
-                return val + '%';
-            }
-        }
+        y: { formatter: function(val) { return Math.round((val / 100) * maxDeviceHeight) + 'px'; } }
     },
     states: {
-        hover: {
-            filter: {
-                type: 'none'
-            }
-        },
-        active: {
-            filter: {
-                type: 'none'
-            }
-        }
+        hover: { filter: { type: 'none' } },
+        active: { filter: { type: 'none' } }
     }
 };
 
 let deviceChart = new ApexCharts(document.querySelector("#device-chart"), deviceOptions);
 deviceChart.render();
 
-// Function to add Android badge - EXACT like screenshot
+// ========== ANDROID BADGE - EXACT FIGMA ==========
 function addAndroidBadge() {
-    // Remove existing badge if any
     const existingBadge = document.querySelector('.android-badge');
     if (existingBadge) existingBadge.remove();
     
@@ -148,7 +119,6 @@ function addAndroidBadge() {
     const svgEl = chartEl.querySelector('svg');
     if (!svgEl) return;
     
-    // Find Android bar (5th bar, index 4)
     const bars = svgEl.querySelectorAll('.apexcharts-bar-area');
     if (bars.length < 5) return;
     
@@ -156,11 +126,9 @@ function addAndroidBadge() {
     const barRect = androidBar.getBoundingClientRect();
     const chartRect = chartEl.getBoundingClientRect();
     
-    // Calculate position
-    const badgeTop = barRect.top - chartRect.top - 42;
+    const badgeTop = barRect.top - chartRect.top - 52;
     const badgeLeft = barRect.left - chartRect.left + (barRect.width / 2);
     
-    // Create badge element - EXACT like screenshot
     const badge = document.createElement('div');
     badge.className = 'android-badge';
     badge.style.cssText = `
@@ -168,83 +136,70 @@ function addAndroidBadge() {
         top: ${badgeTop}px;
         left: ${badgeLeft}px;
         transform: translateX(-50%);
-        background: #2C2C2E;
+        background: linear-gradient(180deg, #4A4A4A 0%, #2C2C2E 100%);
         color: white;
-        padding: 8px 16px;
+        width: 78px;
+        height: 44px;
         border-radius: 24px;
-        font-size: 14px;
-        font-weight: 500;
+        font-size: 18px;
+        font-weight: 600;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         white-space: nowrap;
         z-index: 10;
         pointer-events: none;
         letter-spacing: 0.3px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     `;
     badge.textContent = '243K';
     
-    // Small arrow below badge - EXACT like screenshot
-    const arrow = document.createElement('div');
-    arrow.style.cssText = `
-        position: absolute;
-        bottom: -5px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 5px solid #2C2C2E;
-    `;
-    badge.appendChild(arrow);
-    
-    // Make chart container relative for absolute positioning
     chartEl.style.position = 'relative';
     chartEl.appendChild(badge);
 }
 
 
+// ========== LOCATION TRAFFIC BAR CHART - EXACT FIGMA ==========
+const locationData = [
+    { label: 'US', height: 81, color: '#0000000A' },
+    { label: 'Canada', height: 114, color: '#0000000A' },
+    { label: 'Mexico', height: 97, color: '#0000000A' },
+    { label: 'China', height: 48, color: '#0000000A' },
+    { label: 'Japan', height: 130, color: '#0000000A' },
+    { label: 'Australia', height: 65, color: '#0000000A' }
+];
 
-// ========== LOCATION TRAFFIC BAR CHART ==========
+const maxLocationHeight = 130;
+
 let locationOptions = {
     series: [{
         name: 'Traffic',
-        data: [50, 30, 20, 40, 25, 15]
+        data: locationData.map(d => (d.height / maxLocationHeight) * 100)
     }],
     chart: {
         type: 'bar',
         height: 200,
         toolbar: { show: false },
         parentHeightOffset: 0,
-        animations: {
-            enabled: false
-        }
+        animations: { enabled: false }
     },
     plotOptions: {
         bar: {
-            columnWidth: '72%',
-            borderRadius: 8,
+            columnWidth: '55%',
+            borderRadius: 20,
             borderRadiusApplication: 'end',
             distributed: true,
             states: {
-                hover: {
-                    filter: {
-                        type: 'none'
-                    }
-                },
-                active: {
-                    filter: {
-                        type: 'none'
-                    }
-                }
+                hover: { filter: { type: 'none' } },
+                active: { filter: { type: 'none' } }
             }
         }
     },
-    colors: ['#E5E7EB', '#E5E7EB', '#E5E7EB', '#E5E7EB', '#E5E7EB', '#E5E7EB'],
-    dataLabels: {
-        enabled: false
-    },
+    colors: locationData.map(d => d.color),
+    dataLabels: { enabled: false },
     xaxis: {
-        categories: ['US', 'Canada', 'Mexico', 'China', 'Japan', 'Australia'],
+        categories: locationData.map(d => d.label),
         axisBorder: { show: false },
         axisTicks: { show: false },
         labels: {
@@ -255,43 +210,21 @@ let locationOptions = {
             }
         }
     },
-    yaxis: {
-        show: false,
-        max: 60
-    },
-    grid: {
-        show: false,
-        padding: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0
-        }
-    },
-    legend: {
-        show: false
-    },
+    yaxis: { show: false },
+    grid: { show: false },
+    legend: { show: false },
     tooltip: {
-        enabled: true
+        enabled: true,
+        y: { formatter: function(val) { return Math.round((val / 100) * maxLocationHeight) + 'px'; } }
     },
     states: {
-        hover: {
-            filter: {
-                type: 'none'
-            }
-        },
-        active: {
-            filter: {
-                type: 'none'
-            }
-        }
+        hover: { filter: { type: 'none' } },
+        active: { filter: { type: 'none' } }
     }
 };
 
 let locationChart = new ApexCharts(document.querySelector("#location-chart"), locationOptions);
 locationChart.render();
-
-
 
 
 
