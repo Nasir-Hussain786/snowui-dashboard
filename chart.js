@@ -290,3 +290,155 @@ let locationOptions = {
 
 let locationChart = new ApexCharts(document.querySelector("#location-chart"), locationOptions);
 locationChart.render();
+
+
+
+
+
+// ========== PRODUCT TRAFFIC CHART - 48 COLUMNS ==========
+
+// Base 6 columns ki exact detail (Top to Bottom: Black, TransBlack, Red)
+const baseColumns = [
+    { black: 15, transBlack: 17, red: 81 },      // Col 1: 117px total
+    { black: 18, transBlack: 15, red: 80 },      // Col 2: 132px total
+    { black: 23, transBlack: 28, red: 109 },     // Col 3: 164px total
+    { black: 37, transBlack: 43, red: 96 },      // Col 4: 180px total
+    { black: 22, transBlack: 22, red: 113 },     // Col 5: 161px total
+    { black: 19, transBlack: 13, red: 105 },     // Col 6: 141px total
+];
+
+// Logic se baaki 42 columns generate karna
+function generateColumns(base, count) {
+    const columns = [...base];
+    
+    for (let i = base.length; i < count; i++) {
+        const baseIndex = i % 6;
+        const baseCol = base[baseIndex];
+        
+        // Random variation (-15% to +20%)
+        const variation = () => 0.85 + Math.random() * 0.35;
+        
+        let black = Math.round(baseCol.black * variation());
+        let transBlack = Math.round(baseCol.transBlack * variation());
+        let red = Math.round(baseCol.red * variation());
+        
+        // Ensure minimum heights
+        black = Math.max(8, Math.min(45, black));
+        transBlack = Math.max(6, Math.min(50, transBlack));
+        red = Math.max(45, Math.min(140, red));
+        
+        columns.push({ black, transBlack, red });
+    }
+    
+    return columns;
+}
+
+// Generate 48 columns
+const columnData = generateColumns(baseColumns, 48);
+
+// Max height for scaling
+const maxHeight = 200;
+
+// Prepare series data - REVERSE ORDER for correct stacking (Bottom to Top)
+// ApexCharts stacks: Series[0] = Bottom, Series[last] = Top
+// We want: Top=Black, Center=TransBlack, Bottom=Red
+// So: Series[0] = Red (Bottom), Series[1] = TransBlack (Center), Series[2] = Black (Top)
+
+const redSeries = columnData.map(d => (d.red / maxHeight) * 100);
+const transBlackSeries = columnData.map(d => (d.transBlack / maxHeight) * 100);
+const blackSeries = columnData.map(d => (d.black / maxHeight) * 100);
+
+// Generate month labels (4 columns per month)
+const labels = [];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+for (let i = 0; i < 48; i++) {
+    if (i % 4 === 0) {
+        labels.push(months[Math.floor(i / 4)]);
+    } else {
+        labels.push('');
+    }
+}
+
+let productOptions = {
+    series: [
+        {
+            name: 'Red',
+            data: redSeries
+        },
+        {
+            name: 'TransBlack',
+            data: transBlackSeries
+        },
+        {
+            name: 'Black',
+            data: blackSeries
+        }
+    ],
+    chart: {
+        type: 'bar',
+        height: 320,
+        toolbar: { show: false },
+        parentHeightOffset: 0,
+        animations: { enabled: false },
+        stacked: true
+    },
+    plotOptions: {
+        bar: {
+            columnWidth: '3px',
+            borderRadius: 2,
+            borderRadiusApplication: 'end',
+            borderRadiusWhenStacked: 'all'
+        }
+    },
+    colors: ['#FF3B30', '#00000066', '#000000'],
+    dataLabels: {
+        enabled: false
+    },
+    xaxis: {
+        categories: labels,
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        labels: {
+            style: {
+                colors: '#9CA3AF',
+                fontSize: '12px',
+                fontFamily: 'inherit'
+            },
+            rotate: 0,
+            hideOverlappingLabels: false
+        },
+        crosshairs: { show: false }
+    },
+    yaxis: {
+        show: false,
+        max: 100
+    },
+    grid: {
+        show: false,
+        padding: {
+            top: 0,
+            right: 10,
+            bottom: 0,
+            left: 10
+        }
+    },
+    legend: {
+        show: false
+    },
+    tooltip: {
+        enabled: true,
+        shared: true,
+        intersect: false
+    },
+    states: {
+        hover: {
+            filter: { type: 'none' }
+        },
+        active: {
+            filter: { type: 'none' }
+        }
+    }
+};
+
+let productChart = new ApexCharts(document.querySelector("#product-chart"), productOptions);
+productChart.render();
